@@ -1,0 +1,13 @@
+{
+  "name": "echo_time",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "bull": "~3.11",
+    "express": "~4.16",
+    "moment": "~2.24"
+  }
+}
