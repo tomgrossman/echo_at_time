@@ -6,8 +6,8 @@
     "start": "node app.js"
   },
   "dependencies": {
-    "bull": "~3.11",
     "express": "~4.16",
-    "moment": "~2.24"
+    "moment": "~2.24",
+    "redis": "~2.8"
   }
 }

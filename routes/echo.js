@@ -2,7 +2,7 @@ const express = require('express');
 const moment = require('moment');
 
 const middlewares = require('./../middlewares/middlewares');
-const redisHelper = require('../helpers/queue');
+const redisHelper = require('../helpers/redis');
 
 const router = express.Router();
 
