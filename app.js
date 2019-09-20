@@ -9,8 +9,8 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use('/echoAtTime', echoRouter);
 
-app.listen(1337, () => {
-    console.log('listening on port 1337');
+app.listen(3000, () => {
+    console.log('listening on port 3000');
 });
 
 module.exports = app;
