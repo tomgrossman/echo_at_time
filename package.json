@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "express": "~4.16",
-    "moment": "~2.24",
-    "redis": "~2.8"
+    "ioredis": "~4.14",
+    "moment": "~2.24"
   }
 }

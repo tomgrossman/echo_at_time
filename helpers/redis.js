@@ -1,13 +1,10 @@
 const moment = require('moment');
-const redis = require('redis');
-const { promisify } = require('util');
+const Redis = require('ioredis');
 
-const client = redis.createClient('redis://redis-server:6379');
-const keysAsync = promisify(client.keys).bind(client);
-const zaddAsync = promisify(client.zadd).bind(client);
+const redis = new Redis('redis://localhost:4444');
 
 exports.setMessage = async function (message, momentTime) {
-    await zaddAsync([
+    await redis.zadd([
         message,
         momentTime.valueOf(),
         momentTime.valueOf()
@@ -17,22 +14,31 @@ exports.setMessage = async function (message, momentTime) {
 async function printCurrentMessages () {
     const currentTime = moment().valueOf().toString();
 
-    const messages = await keysAsync('*');
-    //it's ok to iterate over messages, since if another server already took them, the zrangebyscore will return nothing
+    const messagesStream = await redis.scanStream();
+    messagesStream.on('data', (resultKeys) => {
+        for (const currMessage of resultKeys) {
+            redis
+                .multi()
+                .zrangebyscore([currMessage, '0', currentTime])
+                .zremrangebyscore([currMessage, '0', currentTime])
+                .exec((err, replies) => {
+                    const rangeResult = replies[0];
+                    const membersResult = rangeResult[1];
+                    if (0 < membersResult.length) {
+                        //to support same message at the same time
+                        const toPrint = membersResult
+                            .filter(m => Boolean(m))
+                            .map( () => currMessage).join('\n');
+                        console.log(toPrint);
+                    }
+                }
+            );
+        }
+    });
 
-    for (const currMessage of messages) {
-        const multi = client.multi();
-        multi.zrangebyscore([currMessage, '0', currentTime]);
-        multi.zremrangebyscore([currMessage, '0', currentTime]);
-        multi.exec((err, replies) => {
-            const rangeResult = replies[0];
-            if (0 < rangeResult.length) {
-                //to support same message at the same time
-                const toPrint = rangeResult.map( () => currMessage).join('\m');
-                console.log(toPrint);
-            }
-        });
-    }
+    messagesStream.on('end', () => {
+        setTimeout(printCurrentMessages, 200)
+    })
 }
 
-setInterval(printCurrentMessages, 100);
+printCurrentMessages();
