@@ -1,7 +1,7 @@
 const moment = require('moment');
 const Redis = require('ioredis');
 
-const redis = new Redis('redis://localhost:4444');
+const redis = new Redis('redis://redis-server:6379');
 
 exports.setMessage = async function (message, momentTime) {
     await redis.zadd([
